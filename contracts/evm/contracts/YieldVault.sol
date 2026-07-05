@@ -164,7 +164,11 @@ contract YieldVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
     /// @notice Realize profit since the last harvest and mint the protocol's
     ///         fee to the treasury as shares. Callable by anyone: the fee only
     ///         ever takes a slice of *new profit*, never principal.
-    function harvest() public returns (uint256 feeShares) {
+    function harvest() external nonReentrant returns (uint256 feeShares) {
+        return _harvest();
+    }
+
+    function _harvest() internal returns (uint256 feeShares) {
         uint256 total = totalAssets();
         uint256 highWater = lastTotalAssets;
         if (total <= highWater) return 0;
@@ -261,15 +265,18 @@ contract YieldVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
         }
 
         // Lock in the fee on profit earned at the old venue before moving.
-        harvest();
+        _harvest();
 
-        uint256 moved;
+        // Effects before interactions: the vault's own state points at the
+        // new venue before any external strategy call.
+        activeStrategy = IStrategy(newStrategy);
+        lastRebalanceAt = block.timestamp;
+
+        uint256 moved = 0;
         if (address(current) != address(0)) {
             moved = current.withdrawAll(address(this));
         }
-        activeStrategy = IStrategy(newStrategy);
         _pushToStrategy();
-        lastRebalanceAt = block.timestamp;
 
         // Withdraw-all rounding at the old venue must not register as profit/loss.
         lastTotalAssets = totalAssets();
@@ -306,7 +313,7 @@ contract YieldVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
     function setPerformanceFeeBps(uint256 feeBps) external onlyOwner {
         if (feeBps > MAX_PERFORMANCE_FEE_BPS) revert FeeTooHigh();
         // Charge pending profit at the old rate before changing it.
-        harvest();
+        _harvest();
         performanceFeeBps = feeBps;
         emit PerformanceFeeSet(feeBps);
     }
@@ -332,14 +339,15 @@ contract YieldVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
 
     /// @notice Pull everything back from the strategy and pause deposits.
     ///         Users can still withdraw from the vault's idle balance.
-    function emergencyWithdraw() external onlyKeeperOrOwner {
+    function emergencyWithdraw() external onlyKeeperOrOwner nonReentrant {
         IStrategy strategy = activeStrategy;
-        uint256 recovered;
+        // Effects before interactions
+        activeStrategy = IStrategy(address(0));
+        if (!paused()) _pause();
+        uint256 recovered = 0;
         if (address(strategy) != address(0)) {
             recovered = strategy.withdrawAll(address(this));
-            activeStrategy = IStrategy(address(0));
         }
-        if (!paused()) _pause();
         // Reset the high-water mark: venue losses (if any) must not be
         // charged as negative profit, and recovery must not be double-charged.
         lastTotalAssets = totalAssets();

@@ -29,6 +29,7 @@ contract EthGateway is ReentrancyGuard {
     error ZeroAmount();
     error EthTransferFailed();
     error NotWETH();
+    error ApproveFailed();
 
     constructor(address weth_, address vault_) {
         weth = IWETH(weth_);
@@ -36,7 +37,7 @@ contract EthGateway is ReentrancyGuard {
         if (vault.asset() != weth_) revert VaultAssetNotWETH();
         // The gateway never holds funds between transactions, so a standing
         // max approval to the vault is safe.
-        weth.approve(vault_, type(uint256).max);
+        if (!weth.approve(vault_, type(uint256).max)) revert ApproveFailed();
     }
 
     function depositETH(address receiver) external payable nonReentrant returns (uint256 shares) {
