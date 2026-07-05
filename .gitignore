@@ -1,0 +1,13 @@
+node_modules/
+artifacts/
+cache/
+typechain-types/
+coverage/
+.env
+.env.local
+.next/
+out/
+target/
+.anchor/
+test-ledger/
+*.log
