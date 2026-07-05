@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-surface text-slate-200 antialiased;
+  background-image:
+    radial-gradient(1200px 500px at 15% -10%, rgba(79, 124, 255, 0.09), transparent 60%),
+    radial-gradient(900px 400px at 90% 0%, rgba(52, 211, 153, 0.05), transparent 60%);
+  background-repeat: no-repeat;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-surface-border bg-surface-card shadow-lg shadow-black/30;
+  }
+
+  .stat-label {
+    @apply text-[11px] font-medium uppercase tracking-wider text-muted;
+  }
+
+  .input-amount {
+    @apply w-full rounded-xl border border-surface-border bg-surface-raised px-3 py-2.5 pr-16 font-mono text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-600 focus:border-accent;
+  }
+
+  .btn-primary {
+    @apply w-full rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-surface-border disabled:text-muted;
+  }
+
+  .btn-secondary {
+    @apply w-full rounded-xl border border-surface-border bg-surface-raised px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-accent hover:text-white disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-max {
+    @apply absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-accent-soft px-2 py-1 text-[11px] font-semibold text-accent transition-colors hover:bg-accent hover:text-white;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-surface-border bg-surface-raised px-2.5 py-1 text-xs font-medium;
+  }
+
+  .tab-btn {
+    @apply rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors;
+  }
+}
+
+/* --- Solana wallet-adapter button, restyled to match the app theme --- */
+.wallet-adapter-button {
+  height: 38px !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  background-color: #161b26 !important;
+  border: 1px solid #232a38 !important;
+  color: #e2e8f0 !important;
+  padding: 0 14px !important;
+  line-height: 1 !important;
+}
+
+.wallet-adapter-button:hover:not([disabled]) {
+  background-color: #1b2130 !important;
+  border-color: #4f7cff !important;
+}
+
+.wallet-adapter-button-trigger {
+  background-color: #161b26 !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background-color: #12161f !important;
+  border: 1px solid #232a38 !important;
+  border-radius: 16px !important;
+  font-family: inherit !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background-color: #1b2130 !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background-color: #1b2130 !important;
+}
